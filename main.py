@@ -20,18 +20,19 @@ def bits_np_array_to_string(bit_np_array):
 
 def add_postfix(filename):
     name, extension = os.path.splitext(filename)
-    return f"{name}_{'encoded'}{extension}"
+    return f"{name}_encoded'{extension}"
 
 
-def pixel_brightness(image, x, y):
+def pixel_brightness(image, x, y): #BGR
     return 0.299 * image[y, x, 2] + 0.587 * image[y, x, 1] + 0.144 * image[y, x, 0]
 
 
 def encode_message_to_image(image_path, message, key, sigma, repeat_times, q=2):
+    message_bits = string_to_bits_np_array(message) #[0, 1]
+    multipliers = np.where(message_bits == 0, -1, message_bits) #[-1, 1]
+    multipliers = np.repeat(multipliers, repeat_times) #[-1, -1, -1, -1, -1, 1, 1, 1, 1, 1]
+
     image = cv2.imread(image_path)
-    message_bits = string_to_bits_np_array(message)
-    multipliers = np.where(message_bits == 0, -1, message_bits)
-    multipliers = np.repeat(multipliers, repeat_times)
     height, width, _ = image.shape
 
     np.random.seed(key)
@@ -83,7 +84,7 @@ def show_images(original_image_name):
     encoded_image_name = add_postfix(original_image_name)
     encoded_image_rgb = cv2.cvtColor(cv2.imread(encoded_image_name), cv2.COLOR_BGR2RGB)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 7))
 
     ax1.imshow(original_image_rgb)
     ax1.set_title('Original image')
