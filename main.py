@@ -27,11 +27,11 @@ def pixel_brightness(image, x, y):
     return 0.299 * image[y, x, 2] + 0.587 * image[y, x, 1] + 0.144 * image[y, x, 0]
 
 
-def encode_message_to_image(image_path, message, key, sigma, q=2):
+def encode_message_to_image(image_path, message, key, sigma, repeat_times, q=2):
     image = cv2.imread(image_path)
     message_bits = string_to_bits_np_array(message)
     multipliers = np.where(message_bits == 0, -1, message_bits)
-
+    multipliers = np.repeat(multipliers, repeat_times)
     height, width, _ = image.shape
 
     np.random.seed(key)
@@ -45,11 +45,11 @@ def encode_message_to_image(image_path, message, key, sigma, q=2):
     cv2.imwrite(add_postfix(image_path), image)
 
 
-def decode_message_from_image(image_path, key, sigma, meaningful_bits):
+def decode_message_from_image(image_path, key, sigma, repeat_times, meaningful_bits):
     image = cv2.imread(image_path)
     height, width, _ = image.shape
 
-    bits = []
+    bits_with_repeats = []
     np.random.seed(key)
     for _ in range(sigma, width - sigma):
         for _ in range(sigma, height - sigma):
@@ -67,7 +67,12 @@ def decode_message_from_image(image_path, key, sigma, meaningful_bits):
                             image[y, x - i, 0])
             predicted = blue_sum / (4 * sigma)
 
-            bits.append(1 if actual > predicted else 0)
+            bits_with_repeats.append(1 if actual > predicted else 0)
+
+    bits = []
+    for i in range(0, len(bits_with_repeats) - repeat_times, repeat_times):
+        bits_of_one = bits_with_repeats[i: i + repeat_times]
+        bits.append(round(sum(bits_of_one) / len(bits_of_one)))
 
     return bits_np_array_to_string(np.array(bits)[:meaningful_bits])
 
@@ -97,12 +102,13 @@ image_name = '1684384546_1234_w2xex_2x_jpg.jpg'
 
 key = 4242
 sigma = 4
+repeat_times = 5
 
 print("Original message: " + message)
 
-encode_message_to_image(image_name, message, key, sigma)
+encode_message_to_image(image_name, message, key, sigma, repeat_times)
 
 print("Decoded message:  " +
-      decode_message_from_image(add_postfix(image_name), key, sigma, 200))
+      decode_message_from_image(add_postfix(image_name), key, sigma, repeat_times, 200))
 
 show_images(image_name)
