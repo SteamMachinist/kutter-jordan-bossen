@@ -20,7 +20,7 @@ def bits_np_array_to_string(bit_np_array):
 
 def add_postfix(filename):
     name, extension = os.path.splitext(filename)
-    return f"{name}_encoded'{extension}"
+    return f"{name}_encoded{extension}"
 
 
 def pixel_brightness(image, x, y): #BGR
