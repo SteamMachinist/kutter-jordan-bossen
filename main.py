@@ -99,10 +99,10 @@ def show_images(original_image_name):
 
 
 message = "Hello, World!"
-image_name = '1684384546_1234_w2xex_2x_jpg.jpg'
+image_name = 'Volume_91.jpg'
 
 key = 4242
-sigma = 4
+sigma = 3
 repeat_times = 5
 
 print("Original message: " + message)
